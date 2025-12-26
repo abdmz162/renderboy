@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <math.h>
+#include <stdlib.h>
 
 #include "drawing.h"
 
-Vec3 screen(Vec3 alpha){
+Vec3 screen(Vec3 alpha) {
     // translates the 3d's camera coordinates into the 2d raylib coordinates
     Vec3 p_r={((alpha.x+1)/2*WIDTH),
             ((- alpha.y+1)/2*HEIGHT)
@@ -11,25 +12,47 @@ Vec3 screen(Vec3 alpha){
     return p_r;
 }
 
-Vec3 project(Vec3 alpha){
+Vec3 project(Vec3 alpha) {
+    if (alpha.z <= NEAR) {
+        return (Vec3){NAN, NAN, alpha.z}; // invalid projection
+    }
     return (Vec3){alpha.x/alpha.z,alpha.y/alpha.z,alpha.z};
 }
 
-void draw_point(Vec3 beta){
+int valid(Vec3 p) {
+    return !isnan(p.x) && !isnan(p.y);
+}
+
+
+void draw_point(Vec3 beta) {
     int s=10; 
     DrawRectangle(beta.x-s/2, beta.y-s/2, s, s, RAYWHITE);//sutracting s/2 to render the rectangle in the centre
 }
 
-Vec3 translate(Vec3 p,float dx, float dy, float dz){
+Vec3 translate(Vec3 p,float dx, float dy, float dz) {
     return (Vec3){p.x+dx,p.y+dy,p.z+dz};
 }
 
-Vec3 rotate_xz(float x,float y, float z, float theta){
-    return (Vec3){x*cos(theta)-z*sin(theta),y,x*sin(theta)+z*cos(theta)};
+Vec3 rotate_xz(float x,float y, float z, float psi) {
+    return (Vec3){x*cos(psi)-z*sin(psi),y,x*sin(psi)+z*cos(psi)};
 }
 
-Vec3 rotate_xz_point_based(Vec3 p, float theta){
-    return (Vec3){p.x*cos(theta)-p.z*sin(theta),p.y,p.x*sin(theta)+p.z*cos(theta)};
+Vec3 rotate_xz_point_based(Vec3 p, float psi) { // yaw
+    return (Vec3){p.x*cos(psi)-p.z*sin(psi),p.y,p.x*sin(psi)+p.z*cos(psi)};
+}
+
+Vec3 rotate_yz_point_based(Vec3 p, float theta) { // pitch
+    return (Vec3){p.x,p.y*cos(theta)-p.z*sin(theta),p.y*sin(theta)+p.z*cos(theta)};
+}
+
+void drawEdge(Vec3 p1, Vec3 p2, Color color) {
+    if (valid(p1) && valid(p2))
+        DrawLine((int)(screen((p1)).x),
+        (int)(screen((p1)).y),
+        (int)(screen((p2)).x),
+        (int)(screen((p2)).y),
+        color
+        );
 }
 
 void frame(const Vec3 cameraPosition, const Rotation cameraRotation) {
@@ -37,96 +60,55 @@ void frame(const Vec3 cameraPosition, const Rotation cameraRotation) {
     float dx = cameraPosition.x;
     float dy = cameraPosition.y;
     float dz = cameraPosition.z;
-    Rotation dtheta = cameraRotation;
+    float dyaw = cameraRotation.yaw;
+    float dpitch = cameraRotation.pitch;
 
     ClearBackground(BLACK);
-    Vec3 projected_p1=project((rotate_xz_point_based(translate((Vec3){0.25,0.25,0.25},dx,dy,dz),dtheta)));
-    // draw_point(rotate_xz_point_based(screen(projected_p1),dtheta));
-    Vec3 projected_p2=project(rotate_xz_point_based(translate((Vec3){-0.25,0.25,0.25},dx,dy,dz),dtheta));
-    // draw_point(rotate_xz_point_based(screen(projected_p2),dtheta));
-    Vec3 projected_p3=project((rotate_xz_point_based(translate((Vec3){0.25,-0.25,0.25},dx,dy,dz),dtheta)));
-    // draw_point(rotate_xz_point_based(screen(projected_p3),dtheta));
-    Vec3 projected_p4=project((rotate_xz_point_based(translate((Vec3){-0.25,-0.25,0.25},dx,dy,dz),dtheta)));
-    // draw_point(rotate_xz_point_based(screen(projected_p4),dtheta));
-    Vec3 projected_p5=project(rotate_xz_point_based(translate((Vec3){0.25,0.25,-0.25},dx,dy,dz),dtheta));
-    // draw_point(rotate_xz_point_based(screen(projected_p5),dtheta));
-    Vec3 projected_p6=project(rotate_xz_point_based(translate((Vec3){-0.25,0.25,-0.25},dx,dy,dz),dtheta));
-    // draw_point(rotate_xz_point_based(screen(projected_p6),dtheta));
-    Vec3 projected_p7=project(rotate_xz_point_based(translate((Vec3){0.25,-0.25,-0.25},dx,dy,dz),dtheta));
-    //draw_point(rotate_xz_point_based(screen(projected_p7),dtheta));
-    Vec3 projected_p8=project(rotate_xz_point_based(translate((Vec3){-0.25,-0.25,-0.25},dx,dy,dz),dtheta));
-    //draw_point(rotate_xz_point_based(screen(projected_p8),dtheta));
 
-    //drawing lines:
-    DrawLine((int)(screen((projected_p1)).x),
-    (int)(screen((projected_p1)).y),
-    (int)(screen((projected_p2)).x),
-    (int)(screen((projected_p2)).y),
-    GREEN
-    );
-    DrawLine((int)(screen((projected_p1)).x),
-    (int)(screen((projected_p1)).y),
-    (int)(screen((projected_p3)).x),
-    (int)(screen((projected_p3)).y),
-    GREEN
-    );
-    DrawLine((int)(screen((projected_p3)).x),
-    (int)(screen((projected_p3)).y),
-    (int)(screen((projected_p4)).x),
-    (int)(screen((projected_p4)).y),
-    GREEN
-    );
-    DrawLine((int)(screen((projected_p2)).x),
-    (int)(screen((projected_p2)).y),
-    (int)(screen((projected_p4)).x),
-    (int)(screen((projected_p4)).y),
-    GREEN
-    );
-    DrawLine((int)(screen((projected_p5)).x),
-    (int)(screen((projected_p5)).y),
-    (int)(screen((projected_p6)).x),
-    (int)(screen((projected_p6)).y),
-    RAYWHITE
-    );
-    DrawLine((int)(screen((projected_p5)).x),
-    (int)(screen((projected_p5)).y),
-    (int)(screen((projected_p7)).x),
-    (int)(screen((projected_p7)).y),
-    RAYWHITE
-    );
-    DrawLine((int)(screen((projected_p7)).x),
-    (int)(screen((projected_p7)).y),
-    (int)(screen((projected_p8)).x),
-    (int)(screen((projected_p8)).y),
-    RAYWHITE
-    );
-    DrawLine((int)(screen((projected_p6)).x),
-    (int)(screen((projected_p6)).y),
-    (int)(screen((projected_p8)).x),
-    (int)(screen((projected_p8)).y),
-    RAYWHITE
-    );
-    DrawLine((int)(screen((projected_p1)).x),
-    (int)(screen((projected_p1)).y),
-    (int)(screen((projected_p5)).x),
-    (int)(screen((projected_p5)).y),
-    RAYWHITE
-    );DrawLine((int)(screen((projected_p2)).x),
-    (int)(screen((projected_p2)).y),
-    (int)(screen((projected_p6)).x),
-    (int)(screen((projected_p6)).y),
-    RAYWHITE
-    );DrawLine((int)(screen((projected_p3)).x),
-    (int)(screen((projected_p3)).y),
-    (int)(screen((projected_p7)).x),
-    (int)(screen((projected_p7)).y),
-    RAYWHITE
-    );DrawLine((int)(screen((projected_p4)).x),
-    (int)(screen((projected_p4)).y),
-    (int)(screen((projected_p8)).x),
-    (int)(screen((projected_p8)).y),
-    RAYWHITE
-    );
+    Vec3 points[] = {
+        {0.5,0.5,0.5},
+        {-0.5,0.5,0.5},
+        {0.5,-0.5,0.5},
+        {-0.5,-0.5,0.5},
+        {0.5,0.5,-0.5},
+        {-0.5,0.5,-0.5},
+        {0.5,-0.5,-0.5},
+        {-0.5,-0.5,-0.5},
+    };
+
+    int numberOfPoints = sizeof(points) / sizeof(Vec3);
+    Vec3 *projectedPoints = calloc(numberOfPoints, sizeof(Vec3));
+
+    for (int i = 0; i < numberOfPoints; i++) {
+        projectedPoints[i] = project(rotate_yz_point_based(rotate_xz_point_based(translate(points[i],dx,dy,dz), dyaw),dpitch));
+    }
+
+    Edge edges[] = {
+        {0, 1, GREEN},
+        {0, 2, GREEN},
+        {2, 3, GREEN},
+        {1, 3, GREEN},
+        {4, 5, BLUE},
+        {4, 6, BLUE},
+        {5, 7, BLUE},
+        {6, 7, BLUE},
+        {0, 4, RAYWHITE},
+        {1, 5, RAYWHITE},
+        {2, 6, RAYWHITE},
+        {3, 7, RAYWHITE},
+    };
+
+    for (int i = 0; i < (sizeof(edges) / sizeof(Edge)); i++) {
+        Edge edge = edges[i];
+        Vec3 p1 = projectedPoints[edge.v1];
+        Vec3 p2 = projectedPoints[edge.v2];
+        drawEdge(p1, p2, edge.color);
+    }
+}
+
+
+float radToDeg(float rad) {
+    return rad * (180 / PI);
 }
 
 void add_ui(const Vec3 cameraPosition, const Rotation cameraRotation) {
@@ -137,20 +119,29 @@ void add_ui(const Vec3 cameraPosition, const Rotation cameraRotation) {
 
     Color positionColor = RED;
     float fontSize = 20;
-    int offsetX = 100, offsetY = 20;
+    int offsetX = 30, offsetY = 20;
+    int floatPrecision = 2;
     // X postition
-    snprintf(str, sizeof(str), "X: %.3f", cameraPosition.x);
+    snprintf(str, sizeof(str), "X: %.*f", floatPrecision, cameraPosition.x);
     DrawText(str, offsetX + 0, offsetY, fontSize, positionColor);
 
     // Y postition
-    snprintf(str, sizeof(str), "Y: %.3f", cameraPosition.y);
-    DrawText(str, offsetX + 130, offsetY, fontSize, positionColor);
+    snprintf(str, sizeof(str), "Y: %.*f", floatPrecision, cameraPosition.y);
+    DrawText(str, offsetX + 120, offsetY, fontSize, positionColor);
 
     // Z postition
-    snprintf(str, sizeof(str), "Z: %.3f", cameraPosition.z);
-    DrawText(str, offsetX + 260, offsetY, fontSize, positionColor);
+    snprintf(str, sizeof(str), "Z: %.*f", floatPrecision, cameraPosition.z);
+    DrawText(str, offsetX + 240, offsetY, fontSize, positionColor);
 
-    // Angle
-    snprintf(str, sizeof(str), "Theta: %.3f", cameraRotation);
-    DrawText(str, offsetX + 390, offsetY, fontSize, positionColor);
+    // Yaw Angle
+    snprintf(str, sizeof(str), "Yaw: %.*f", floatPrecision, radToDeg(cameraRotation.yaw));
+    DrawText(str, offsetX + 340, offsetY, fontSize, positionColor);
+
+    // Pitch Angle
+    snprintf(str, sizeof(str), "Pitch: %.*f", floatPrecision, radToDeg(cameraRotation.pitch));
+    DrawText(str, offsetX + 480, offsetY, fontSize, positionColor);
+
+    // Roll Angle
+    snprintf(str, sizeof(str), "Roll: %.*f", floatPrecision, radToDeg(cameraRotation.roll));
+    DrawText(str, offsetX + 620, offsetY, fontSize, positionColor);
 }
