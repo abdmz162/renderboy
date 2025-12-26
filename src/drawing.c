@@ -45,6 +45,10 @@ Vec3 rotate_yz_point_based(Vec3 p, float theta) { // pitch
     return (Vec3){p.x,p.y*cos(theta)-p.z*sin(theta),p.y*sin(theta)+p.z*cos(theta)};
 }
 
+Vec3 rotate_xy_point_based(Vec3 p, float phi) { //roll
+    return (Vec3){p.x*cos(phi)-p.y*sin(phi), p.x*sin(phi)+p.y*cos(phi) ,p.z};
+}
+
 void drawEdge(Vec3 p1, Vec3 p2, Color color) {
     if (valid(p1) && valid(p2))
         DrawLine((int)(screen((p1)).x),
@@ -62,6 +66,7 @@ void frame(const Vec3 cameraPosition, const Rotation cameraRotation) {
     float dz = cameraPosition.z;
     float dyaw = cameraRotation.yaw;
     float dpitch = cameraRotation.pitch;
+    float droll = cameraRotation.roll;
 
     ClearBackground(BLACK);
 
@@ -80,7 +85,7 @@ void frame(const Vec3 cameraPosition, const Rotation cameraRotation) {
     Vec3 *projectedPoints = calloc(numberOfPoints, sizeof(Vec3));
 
     for (int i = 0; i < numberOfPoints; i++) {
-        projectedPoints[i] = project(rotate_yz_point_based(rotate_xz_point_based(translate(points[i],dx,dy,dz), dyaw),dpitch));
+        projectedPoints[i] = project(rotate_xy_point_based(rotate_yz_point_based(rotate_xz_point_based(translate(points[i],dx,dy,dz), dyaw),dpitch),droll));
     }
 
     Edge edges[] = {
@@ -92,8 +97,8 @@ void frame(const Vec3 cameraPosition, const Rotation cameraRotation) {
         {4, 6, BLUE},
         {5, 7, BLUE},
         {6, 7, BLUE},
-        {0, 4, RAYWHITE},
-        {1, 5, RAYWHITE},
+        {0, 4, RED},
+        {1, 5, RED},
         {2, 6, RAYWHITE},
         {3, 7, RAYWHITE},
     };

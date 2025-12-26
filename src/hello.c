@@ -94,6 +94,15 @@ void handleInput(float frametime) {
         pitch_angle -= 2*PI*speed/4;
         setCameraRotationPitch(pitch_angle);
     }
+
+    //Clockwise/Anticlockwise rotation:
+    if (IsKeyDown(KEY_E)){
+        roll_angle += 2*PI*speed/4;
+        setCameraRotationRoll(roll_angle);
+    }else if(IsKeyDown(KEY_Q)){
+        roll_angle -= 2*PI*speed/4;
+        setCameraRotationRoll(roll_angle);
+    }
 }
 
 void mainLoop() {
