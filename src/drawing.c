@@ -1,64 +1,60 @@
-#include "raylib.h"
 #include <stdio.h>
 #include <math.h>
-#define WIDTH 800
-#define HEIGHT 800
-#define FPS 120
 
-typedef struct {
-    float x;
-    float y;
-    float z;
-} point;//point in 3d space
+#include "drawing.h"
 
-point screen(point alpha){
-    //translates the 3d's camera coordinates into the 2d raylib coordinates
-    point p_r={((alpha.x+1)/2*WIDTH),
+Vec3 screen(Vec3 alpha){
+    // translates the 3d's camera coordinates into the 2d raylib coordinates
+    Vec3 p_r={((alpha.x+1)/2*WIDTH),
             ((- alpha.y+1)/2*HEIGHT)
     };
-    //printf("x= %d,y= %d",p_r.x,p_r.y);
     return p_r;
 }
 
-point project(point alpha){
-    return (point){alpha.x/alpha.z,alpha.y/alpha.z,alpha.z};
+Vec3 project(Vec3 alpha){
+    return (Vec3){alpha.x/alpha.z,alpha.y/alpha.z,alpha.z};
 }
 
-void draw_point(point beta){
+void draw_point(Vec3 beta){
     int s=10; 
     DrawRectangle(beta.x-s/2, beta.y-s/2, s, s, RAYWHITE);//sutracting s/2 to render the rectangle in the centre
 }
 
-point translate(point p,float dx, float dy, float dz){
-    return (point){p.x+dx,p.y+dy,p.z+dz};
+Vec3 translate(Vec3 p,float dx, float dy, float dz){
+    return (Vec3){p.x+dx,p.y+dy,p.z+dz};
 }
 
-point rotate_xz(float x,float y, float z, float theta){
-    return (point){x*cos(theta)-z*sin(theta),y,x*sin(theta)+z*cos(theta)};
+Vec3 rotate_xz(float x,float y, float z, float theta){
+    return (Vec3){x*cos(theta)-z*sin(theta),y,x*sin(theta)+z*cos(theta)};
 }
 
-point rotate_xz_point_based(point p, float theta){
-    return (point){p.x*cos(theta)-p.z*sin(theta),p.y,p.x*sin(theta)+p.z*cos(theta)};
+Vec3 rotate_xz_point_based(Vec3 p, float theta){
+    return (Vec3){p.x*cos(theta)-p.z*sin(theta),p.y,p.x*sin(theta)+p.z*cos(theta)};
 }
 
-void frame(float dx, float dy, float dz, float dtheta){
+void frame(const Vec3 cameraPosition, const Rotation cameraRotation) {
+
+    float dx = cameraPosition.x;
+    float dy = cameraPosition.y;
+    float dz = cameraPosition.z;
+    Rotation dtheta = cameraRotation;
 
     ClearBackground(BLACK);
-    point projected_p1=project((rotate_xz_point_based(translate((point){0.25,0.25,0.25},dx,dy,dz),dtheta)));
+    Vec3 projected_p1=project((rotate_xz_point_based(translate((Vec3){0.25,0.25,0.25},dx,dy,dz),dtheta)));
     // draw_point(rotate_xz_point_based(screen(projected_p1),dtheta));
-    point projected_p2=project(rotate_xz_point_based(translate((point){-0.25,0.25,0.25},dx,dy,dz),dtheta));
+    Vec3 projected_p2=project(rotate_xz_point_based(translate((Vec3){-0.25,0.25,0.25},dx,dy,dz),dtheta));
     // draw_point(rotate_xz_point_based(screen(projected_p2),dtheta));
-    point projected_p3=project((rotate_xz_point_based(translate((point){0.25,-0.25,0.25},dx,dy,dz),dtheta)));
+    Vec3 projected_p3=project((rotate_xz_point_based(translate((Vec3){0.25,-0.25,0.25},dx,dy,dz),dtheta)));
     // draw_point(rotate_xz_point_based(screen(projected_p3),dtheta));
-    point projected_p4=project((rotate_xz_point_based(translate((point){-0.25,-0.25,0.25},dx,dy,dz),dtheta)));
+    Vec3 projected_p4=project((rotate_xz_point_based(translate((Vec3){-0.25,-0.25,0.25},dx,dy,dz),dtheta)));
     // draw_point(rotate_xz_point_based(screen(projected_p4),dtheta));
-    point projected_p5=project(rotate_xz_point_based(translate((point){0.25,0.25,-0.25},dx,dy,dz),dtheta));
+    Vec3 projected_p5=project(rotate_xz_point_based(translate((Vec3){0.25,0.25,-0.25},dx,dy,dz),dtheta));
     // draw_point(rotate_xz_point_based(screen(projected_p5),dtheta));
-    point projected_p6=project(rotate_xz_point_based(translate((point){-0.25,0.25,-0.25},dx,dy,dz),dtheta));
+    Vec3 projected_p6=project(rotate_xz_point_based(translate((Vec3){-0.25,0.25,-0.25},dx,dy,dz),dtheta));
     // draw_point(rotate_xz_point_based(screen(projected_p6),dtheta));
-    point projected_p7=project(rotate_xz_point_based(translate((point){0.25,-0.25,-0.25},dx,dy,dz),dtheta));
+    Vec3 projected_p7=project(rotate_xz_point_based(translate((Vec3){0.25,-0.25,-0.25},dx,dy,dz),dtheta));
     //draw_point(rotate_xz_point_based(screen(projected_p7),dtheta));
-    point projected_p8=project(rotate_xz_point_based(translate((point){-0.25,-0.25,-0.25},dx,dy,dz),dtheta));
+    Vec3 projected_p8=project(rotate_xz_point_based(translate((Vec3){-0.25,-0.25,-0.25},dx,dy,dz),dtheta));
     //draw_point(rotate_xz_point_based(screen(projected_p8),dtheta));
 
     //drawing lines:
@@ -133,42 +129,28 @@ void frame(float dx, float dy, float dz, float dtheta){
     );
 }
 
+void add_ui(const Vec3 cameraPosition, const Rotation cameraRotation) {
 
-int main() {
-    SetTargetFPS(FPS);
-    float dz=1;
-    float dx=0;
-    float dy=0;
-    float angle=0;
-    float frametime;
-    InitWindow(WIDTH, HEIGHT, "Local Raylib");
-    while (!WindowShouldClose()) {
-        BeginDrawing();
-        frame( dx,dy,dz,angle);
-        EndDrawing();
-        frametime = GetFrameTime();
-        if(IsKeyDown(KEY_S)){
-            dz+=1*frametime;
-        }if(IsKeyDown(KEY_W)){
-            dz-=1*frametime;
-        }if(IsKeyDown(KEY_A)){
-            dx+=1*frametime;
-        }if(IsKeyDown(KEY_D)){
-            dx-=1*frametime;
-        }if(IsKeyDown(KEY_SPACE)){
-            dy-=1*frametime;
-        }if(IsKeyDown(KEY_LEFT_SHIFT)){
-            dy+=1*frametime;
-        }if(IsKeyDown(KEY_RIGHT)){
-            angle+=2*frametime/4;
-        }if(IsKeyDown(KEY_LEFT)){
-            angle-=2*frametime/4;
-        }
-        
-        //dz+=1*frametime;
-        //angle+=2*PI*frametime/8 ;
-    }
-    CloseWindow();
-    return 0;
+    char str[100];
+    DrawFPS(100, 100);
+
+
+    Color positionColor = RED;
+    float fontSize = 20;
+    int offsetX = 100, offsetY = 20;
+    // X postition
+    snprintf(str, sizeof(str), "X: %.3f", cameraPosition.x);
+    DrawText(str, offsetX + 0, offsetY, fontSize, positionColor);
+
+    // Y postition
+    snprintf(str, sizeof(str), "Y: %.3f", cameraPosition.y);
+    DrawText(str, offsetX + 130, offsetY, fontSize, positionColor);
+
+    // Z postition
+    snprintf(str, sizeof(str), "Z: %.3f", cameraPosition.z);
+    DrawText(str, offsetX + 260, offsetY, fontSize, positionColor);
+
+    // Angle
+    snprintf(str, sizeof(str), "Theta: %.3f", cameraRotation);
+    DrawText(str, offsetX + 390, offsetY, fontSize, positionColor);
 }
-
