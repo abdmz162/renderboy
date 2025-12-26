@@ -46,30 +46,35 @@ point rotate_xz(float x,float y, float z, float theta){
     return (point){x*cos(theta)-z*sin(theta),y,x*sin(theta)+z*cos(theta)};
 }
 
-point rotate_xz_point_based(point p, float theta){
+point rotate_xz_point_based(point p, float theta){//yaw
     return (point){p.x*cos(theta)-p.z*sin(theta),p.y,p.x*sin(theta)+p.z*cos(theta)};
 }
 
-void frame(float dx, float dy, float dz, float dtheta){
+point rotate_yz_point_based(point p, float phi){//pitch
+    return (point){p.x,p.y*cos(phi)-p.z*sin(phi),p.y*sin(phi)+p.z*cos(phi)};
+}
 
+
+void frame(float dx, float dy, float dz, float dtheta,float dphi){
+    
     ClearBackground(BLACK);
-    point projected_p1=project((rotate_xz_point_based(translate((point){0.5,0.5,0.5},dx,dy,dz), dtheta)));//if i rotate then translate, it rotates the cube, but if i translate then rotate then my camera moves
+    point projected_p1=project(rotate_yz_point_based(rotate_xz_point_based(translate((point){0.5,0.5,0.5},dx,dy,dz), dtheta),dphi));//if i rotate then translate, it rotates the cube, but if i translate then rotate then my camera moves
     // draw_point(rotate_xz_point_based(screen(projected_p1) dtheta));
-    point projected_p2=project(rotate_xz_point_based(translate((point){-0.5,0.5,0.5},dx,dy,dz), dtheta));
+    point projected_p2=project(rotate_yz_point_based(rotate_xz_point_based(translate((point){-0.5,0.5,0.5},dx,dy,dz), dtheta),dphi));
     // draw_point(rotate_xz_point_based(screen(projected_p2) dtheta));
-    point projected_p3=project((rotate_xz_point_based(translate((point){0.5,-0.5,0.5},dx,dy,dz), dtheta)));
+    point projected_p3=project(rotate_yz_point_based(rotate_xz_point_based(translate((point){0.5,-0.5,0.5},dx,dy,dz), dtheta),dphi));
     // draw_point(rotate_xz_point_based(screen(projected_p3) dtheta));
-    point projected_p4=project((rotate_xz_point_based(translate((point){-0.5,-0.5,0.5},dx,dy,dz), dtheta)));
+    point projected_p4=project(rotate_yz_point_based(rotate_xz_point_based(translate((point){-0.5,-0.5,0.5},dx,dy,dz), dtheta),dphi));
     // draw_point(rotate_xz_point_based(screen(projected_p4) dtheta));
-    point projected_p5=project(rotate_xz_point_based(translate((point){0.5,0.5,-0.5},dx,dy,dz), dtheta));
+    point projected_p5=project(rotate_yz_point_based(rotate_xz_point_based(translate((point){0.5,0.5,-0.5},dx,dy,dz), dtheta),dphi));
     // draw_point(rotate_xz_point_based(screen(projected_p5) dtheta));
-    point projected_p6=project(rotate_xz_point_based(translate((point){-0.5,0.5,-0.5},dx,dy,dz), dtheta));
+    point projected_p6=project(rotate_yz_point_based(rotate_xz_point_based(translate((point){-0.5,0.5,-0.5},dx,dy,dz), dtheta),dphi));
     // draw_point(rotate_xz_point_based(screen(projected_p6) dtheta));
-    point projected_p7=project(rotate_xz_point_based(translate((point){0.5,-0.5,-0.5},dx,dy,dz), dtheta));
+    point projected_p7=project(rotate_yz_point_based(rotate_xz_point_based(translate((point){0.5,-0.5,-0.5},dx,dy,dz), dtheta),dphi));
     //draw_point(rotate_xz_point_based(screen(projected_p7) dtheta));
-    point projected_p8=project(rotate_xz_point_based(translate((point){-0.5,-0.5,-0.5},dx,dy,dz), dtheta));
+    point projected_p8=project(rotate_yz_point_based(rotate_xz_point_based(translate((point){-0.5,-0.5,-0.5},dx,dy,dz), dtheta),dphi));
     //draw_point(rotate_xz_point_based(screen(projected_p8) dtheta));
-
+    
     //drawing lines:
     if (valid(projected_p1) && valid(projected_p2))
         DrawLine((int)(screen((projected_p1)).x),
@@ -108,7 +113,7 @@ void frame(float dx, float dy, float dz, float dtheta){
     (int)(screen((projected_p5)).y),
     (int)(screen((projected_p6)).x),
     (int)(screen((projected_p6)).y),
-    RAYWHITE
+    BLUE
     );
 
     if (valid(projected_p5) && valid(projected_p7))
@@ -116,7 +121,7 @@ void frame(float dx, float dy, float dz, float dtheta){
     (int)(screen((projected_p5)).y),
     (int)(screen((projected_p7)).x),
     (int)(screen((projected_p7)).y),
-    RAYWHITE
+    BLUE
     );
 
     if (valid(projected_p7) && valid(projected_p8))
@@ -124,7 +129,7 @@ void frame(float dx, float dy, float dz, float dtheta){
     (int)(screen((projected_p7)).y),
     (int)(screen((projected_p8)).x),
     (int)(screen((projected_p8)).y),
-    RAYWHITE
+    BLUE
     );
 
     if (valid(projected_p6) && valid(projected_p8))
@@ -132,7 +137,7 @@ void frame(float dx, float dy, float dz, float dtheta){
     (int)(screen((projected_p6)).y),
     (int)(screen((projected_p8)).x),
     (int)(screen((projected_p8)).y),
-    RAYWHITE
+    BLUE
     );
 
     if (valid(projected_p1) && valid(projected_p5))
@@ -174,7 +179,8 @@ int main() {
     float dz=1;
     float dx=0;
     float dy=0;
-    float angle=0;//camera angle
+    float yaw_angle=0;//camera angle
+    float pitch_angle=0;
     float frametime;
     float speed;
     //yaw variables
@@ -187,15 +193,15 @@ int main() {
     InitWindow(WIDTH, HEIGHT, "Local Raylib");
     while (!WindowShouldClose()) {
         BeginDrawing();
-        frame( dx,dy,dz,angle);
+        frame( dx,dy,dz,yaw_angle,pitch_angle);
         EndDrawing();
         frametime = GetFrameTime();
         speed = 1.0f * frametime;
 
-        fx = sin(angle);
-        fz = cos(angle);
-        rx = cos(angle);
-        rz = -sin(angle);
+        fx = sin(yaw_angle);
+        fz = cos(yaw_angle);
+        rx = cos(yaw_angle);
+        rz = -sin(yaw_angle);
 
         if (IsKeyDown(KEY_W)) {
             dx -= fx * speed;
@@ -218,9 +224,13 @@ int main() {
         }if(IsKeyDown(KEY_LEFT_SHIFT)){
             dy+=speed;
         }if(IsKeyDown(KEY_RIGHT)){
-            angle+=2*PI*speed/4;
+            yaw_angle+=2*PI*speed/4;
         }if(IsKeyDown(KEY_LEFT)){
-            angle-=2*PI*speed/4;
+            yaw_angle-=2*PI*speed/4;
+        }if(IsKeyDown(KEY_UP)){
+            pitch_angle+=2*PI*speed/4;
+        }if(IsKeyDown(KEY_DOWN)){
+            pitch_angle-=2*PI*speed/4;
         }
         
         //dz+=1*frametime;
