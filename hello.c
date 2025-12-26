@@ -44,21 +44,21 @@ point rotate_xz_point_based(point p, float theta){
 void frame(float dx, float dy, float dz, float dtheta){
 
     ClearBackground(BLACK);
-    point projected_p1=project(translate(rotate_xz(0.25,0.25,0.25,dtheta),dx,dy,dz));
+    point projected_p1=project((rotate_xz_point_based(translate((point){0.25,0.25,0.25},dx,dy,dz),dtheta)));
     // draw_point(rotate_xz_point_based(screen(projected_p1),dtheta));
-    point projected_p2=project(translate(rotate_xz(-0.25,0.25,0.25,dtheta),dx,dy,dz));
+    point projected_p2=project(rotate_xz_point_based(translate((point){-0.25,0.25,0.25},dx,dy,dz),dtheta));
     // draw_point(rotate_xz_point_based(screen(projected_p2),dtheta));
-    point projected_p3=project((translate(rotate_xz(0.25,-0.25,0.25,dtheta),dx,dy,dz)));
+    point projected_p3=project((rotate_xz_point_based(translate((point){0.25,-0.25,0.25},dx,dy,dz),dtheta)));
     // draw_point(rotate_xz_point_based(screen(projected_p3),dtheta));
-    point projected_p4=project((translate(rotate_xz(-0.25,-0.25,0.25,dtheta),dx,dy,dz)));
+    point projected_p4=project((rotate_xz_point_based(translate((point){-0.25,-0.25,0.25},dx,dy,dz),dtheta)));
     // draw_point(rotate_xz_point_based(screen(projected_p4),dtheta));
-    point projected_p5=project(translate(rotate_xz(0.25,0.25,-0.25,dtheta),dx,dy,dz));
+    point projected_p5=project(rotate_xz_point_based(translate((point){0.25,0.25,-0.25},dx,dy,dz),dtheta));
     // draw_point(rotate_xz_point_based(screen(projected_p5),dtheta));
-    point projected_p6=project(translate(rotate_xz(-0.25,0.25,-0.25,dtheta),dx,dy,dz));
+    point projected_p6=project(rotate_xz_point_based(translate((point){-0.25,0.25,-0.25},dx,dy,dz),dtheta));
     // draw_point(rotate_xz_point_based(screen(projected_p6),dtheta));
-    point projected_p7=project(translate(rotate_xz(0.25,-0.25,-0.25,dtheta),dx,dy,dz));
+    point projected_p7=project(rotate_xz_point_based(translate((point){0.25,-0.25,-0.25},dx,dy,dz),dtheta));
     //draw_point(rotate_xz_point_based(screen(projected_p7),dtheta));
-    point projected_p8=project(translate(rotate_xz(-0.25,-0.25,-0.25,dtheta),dx,dy,dz));
+    point projected_p8=project(rotate_xz_point_based(translate((point){-0.25,-0.25,-0.25},dx,dy,dz),dtheta));
     //draw_point(rotate_xz_point_based(screen(projected_p8),dtheta));
 
     //drawing lines:
